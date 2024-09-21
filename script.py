@@ -35,19 +35,26 @@ VENDORS = [
     'Adidas'
 ]
 
-def writeToCSV(info):
-    # create csv file object, in 'write' mode
-    with open('products.csv', mode="w") as csvfile: 
+
+def addToCSV(product):
+    # open the csv file in 'append' mode
+    with open('products.csv', mode="a", newline='') as csvfile: 
 
         # get the fieldnames: the first row of the dictionary
-        fieldnames = info[0].keys() 
+        fieldnames = product[0].keys() 
 
         # initialize a 'csv writer object'
-        writer = csv.DictWriter(csvfile,fieldnames=fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-        writer.writeheader()
-        for row in info: 
-            writer.writerow(row)
+        # only write the header if the file is empty
+        csvfile.seek(0, 2)  # move to the end of the file
+        if csvfile.tell() == 0:  # if the file is empty
+            writer.writeheader()
+
+        # write the product rows
+        for product_row in product: 
+            writer.writerow(product_row)
+
 
 def generateProductInfoBoilerplate():
     # get the product title from the user
@@ -258,8 +265,8 @@ def getVendor(title):
     return 'No Vendor Found'
 
 def main():
-    info = generateProductInfoBoilerplate()
-    writeToCSV(info)
+    product = generateProductInfoBoilerplate()
+    addToCSV(product)
 
 
 main()
