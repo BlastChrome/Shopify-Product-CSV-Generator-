@@ -3,6 +3,37 @@ import re #regular expression
 
 
 
+# the # of varients are the number of rows per product
+# currently the only varient values are gender/shoe size & weight(g)
+VARIENTS = [
+    # size, gender, weight(g)
+    ['4','Men','800'],
+    ['4','Women','800'],
+    ['5','Men','820'],
+    ['5','Women','820'],
+    ['6','Men', '840'],
+    ['6','Women', '840'],
+    ['7','Men', '860'],
+    ['7','Women', '860'],
+    ['8','Men','880'],
+    ['8','Women','880'],
+    ['9','Men','900'],
+    ['9','Women','900'],
+    ['10','Men','920'],
+    ['10','Women','920'],
+    ['11','Men','940'],
+    ['11','Women','940'],
+    ['12','Men','960'],
+    ['12','Women','960']
+]
+
+# List of common sneaker vendors
+VENDORS = [
+    'Jordan', 
+    'Nike', 
+    'New Balance', 
+    'Adidas'
+]
 
 def writeToCSV(info):
     # create csv file object, in 'write' mode
@@ -28,6 +59,9 @@ def generateProductInfoBoilerplate():
     # call the tag helper function
     tags = generateTags(title)
 
+    # look up the vendor based on the title 
+    vendor = getVendor(title)
+
     # get the first letter of every word, to create the SKU - helper function
     sku = generateSku(handle)
 
@@ -43,72 +77,9 @@ def generateProductInfoBoilerplate():
         comp_price = input('Please input comparison price - should be greater than ' + base_price  + ': ')
         comp_price_float = float(comp_price)
 
-
-    boilerplate_values = [{
-        'Handle': handle, 
-        'Title': title, 
-        'Body (HTML)': '',
-        'Vendor': 'Jordan', 
-        'Product Category': 'Shoes', 
-        'Type': 'Sneaker', 
-        'Tags': tags, 
-        'Published': 'TRUE', 
-        'Option1 Name': 'Size', 
-        'Option1 Value': '4', 
-        'Option1 Linked To': '', 
-        'Option2 Name': 'Gender', 
-        'Option2 Value': 'Men', 
-        'Option2 Linked To': '',
-        'Option3 Name': '', 
-        'Option3 Value': '', 
-        'Option3 Linked To': '',
-        'Variant SKU': (sku + '-' + '4M'),
-        'Variant Grams': '800.00', 
-        'Variant Inventory Tracker': '', 
-        'Variant Inventory Policy': 'deny', 
-        'Variant Fulfillment Service': 'manual', 
-        'Variant Price': base_price, 
-        'Variant Compare At Price': comp_price, 
-        'Variant Requires Shipping': 'TRUE', 
-        'Variant Taxable': 'TRUE', 
-        'Variant Barcode': '', 
-        'Image Src': '', 
-        'Image Position': '1', 
-        'Image Alt Text': title, 
-        'Gift Card': 'FALSE', 
-        'SEO Title': ('Best ' + title + ' Kicks4ThaLow | Long Beach, CA'), 
-        'SEO Description': ('Your one stop shop for all your Sneaker Needs, in Long Beach CA specializing in ' + title + ' | Kicks4ThaLow'), 
-        'Google Shopping / Google Product Category': '',
-        'Google Shopping / Gender': '',
-        'Google Shopping / Age Group': '',
-        'Google Shopping / MPN': '',
-        'Google Shopping / Condition': '',
-        'Google Shopping / Custom Product': '',
-        'Google Shopping / Custom Label 0': '',
-        'Google Shopping / Custom Label 1': '',
-        'Google Shopping / Custom Label 2': '',
-        'Google Shopping / Custom Label 3': '',
-        'Google Shopping / Custom Label 4': '',
-        'Snowboard binding mount (product.metafields.test_data.binding_mount)': '',
-        'Snowboard length (product.metafields.test_data.snowboard_length)': '',
-        'Variant Image': '',
-        'Variant Weight Unit': 'lb',
-        'Variant Tax Code': '',
-        'Cost per item': '',
-        'Included / United States': 'TRUE',
-        'Price / United States': base_price,
-        'Compare At Price / United States': comp_price,
-        'Included / International': 'TRUE',
-        'Price / International': base_price,
-        'Compare At Price / International': comp_price,
-        'Included / Mexico': 'TRUE',
-        'Price / Mexico': base_price,
-        'Compare At Price / Mexico': comp_price,
-        'Status': 'active',
-    }]
-    return boilerplate_values
+    multipled_rows = generateMultipleDictRows(handle,title,tags,vendor,base_price,comp_price,sku)
+    return multipled_rows
     
-
 def generateSku(handle):
     # set the sku base to an empty string
     sku = ''
@@ -121,9 +92,7 @@ def generateSku(handle):
         sku = (sku + first_letter).upper()
     return sku
 
-
-
-def generateTags(title='Jordan 4 Retro Bred Reimagined'):
+def generateTags(title):
     # split the tags by space
     tags_arr = title.split(' ')
 
@@ -148,9 +117,145 @@ def generateTags(title='Jordan 4 Retro Bred Reimagined'):
         else:
             tag_str = (tag_str + ' ' + tag + ',')
 
-
     return tag_str
         
+def generateMultipleDictRows(handle,title,tags,vendor,base_price,comp_price,sku): 
+
+    multi_rows = []
+
+
+    for idx, var in enumerate(VARIENTS): 
+
+        # get varient size
+        prod_option_1_value = var[0]
+
+        # get varient gender
+        prod_option_2_value = var[1]
+
+        # get varient weight(g)
+        prod_varient_grams = var[2]
+
+        # generate the varient sku from  the varients
+        prod_varient_sku = (sku + '-' + var[0] + var[1][0])
+
+
+        # generate a row for each varient
+        if not idx == 0:
+            # Dynamic Values, these will update based on the product
+            prod_title = '' 
+            prod_tags = '' 
+            prod_vendor = ''
+
+            # Default Values 
+            prod_category = ''
+            prod_type = ''
+            prod_published = ''
+            prod_option_1_name = ''
+            prod_option_2_name = ''
+            prod_gift_card = ''
+            prod_seo_title = ''
+            prod_seo_description = ''
+            prod_include_us = ''
+            prod_include_mx = ''
+            prod_include_int = ''
+            prod_status = ''
+
+        else: 
+            prod_title = title 
+            prod_handle = handle 
+            prod_tags = tags 
+            prod_vendor = vendor 
+            prod_base_price = base_price 
+            prod_comp_price = comp_price 
+            prod_seo_title = 'Best ' + title + ' Kicks4ThaLow | Long Beach, CA'
+            prod_seo_description = 'Your one stop shop for all your Sneaker Needs, in Long Beach CA specializing in ' + prod_seo_title + ' | Kicks4ThaLow'
+            prod_include_us = 'TRUE'
+            prod_include_mx = 'TRUE'
+            prod_include_int = 'TRUE'
+            prod_status = 'active'
+
+            prod_category = 'Shoes'  
+            prod_type = 'Sneaker'
+            prod_published = 'TRUE'
+            prod_option_1_name = 'Size'
+            prod_option_2_name = 'Gender'
+            prod_gift_card = 'FALSE'
+
+        product_row_template =   {
+            'Handle': prod_handle, 
+            'Title': prod_title,
+            'Body (HTML)': '',
+            'Vendor': prod_vendor, 
+            'Product Category': prod_category, 
+            'Type': prod_type, 
+            'Tags': prod_tags, 
+            'Published': prod_published, 
+            'Option1 Name': prod_option_1_name, 
+            'Option1 Value': prod_option_1_value, 
+            'Option1 Linked To': '', 
+            'Option2 Name': prod_option_2_name, 
+            'Option2 Value': prod_option_2_value, 
+            'Option2 Linked To': '',
+            'Option3 Name': '', 
+            'Option3 Value': '', 
+            'Option3 Linked To': '',
+            'Variant SKU': prod_varient_sku,
+            'Variant Grams': prod_varient_grams, 
+            'Variant Inventory Tracker': '', 
+            'Variant Inventory Policy': 'deny', 
+            'Variant Fulfillment Service': 'manual', 
+            'Variant Price': prod_base_price, 
+            'Variant Compare At Price': prod_comp_price, 
+            'Variant Requires Shipping': 'TRUE', 
+            'Variant Taxable': 'TRUE', 
+            'Variant Barcode': '', 
+            'Image Src': '', 
+            'Image Position': idx + 1, 
+            'Image Alt Text': prod_title, 
+            'Gift Card': prod_gift_card, 
+            'SEO Title': prod_seo_title,
+            'SEO Description': prod_seo_description,
+            'Google Shopping / Google Product Category': '',
+            'Google Shopping / Gender': '',
+            'Google Shopping / Age Group': '',
+            'Google Shopping / MPN': '',
+            'Google Shopping / Condition': '',
+            'Google Shopping / Custom Product': '',
+            'Google Shopping / Custom Label 0': '',
+            'Google Shopping / Custom Label 1': '',
+            'Google Shopping / Custom Label 2': '',
+            'Google Shopping / Custom Label 3': '',
+            'Google Shopping / Custom Label 4': '',
+            'Snowboard binding mount (product.metafields.test_data.binding_mount)': '',
+            'Snowboard length (product.metafields.test_data.snowboard_length)': '',
+            'Variant Image': '',
+            'Variant Weight Unit': 'g',
+            'Variant Tax Code': '',
+            'Cost per item': '',
+            'Included / United States': prod_include_us,
+            'Price / United States': '',
+            'Compare At Price / United States': '',
+            'Included / International': prod_include_int,
+            'Price / International': '',
+            'Compare At Price / International': '',
+            'Included / Mexico': prod_include_mx,
+            'Price / Mexico': '',
+            'Compare At Price / Mexico': '',
+            'Status': prod_status,
+        }
+        multi_rows.append(product_row_template)
+
+    # return the rows
+    return multi_rows
+
+def getVendor(title): 
+
+    # check for the vendor in the title
+    for vendor in VENDORS: 
+        vendor_match = vendor.lower() in title.lower()
+        if vendor_match: 
+            return vendor
+    return 'No Vendor Found'
 
 def main():
     info = generateProductInfoBoilerplate()
@@ -158,5 +263,11 @@ def main():
 
 
 main()
+
+
+
+
+
+
 
 
