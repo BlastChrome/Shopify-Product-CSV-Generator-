@@ -56,7 +56,7 @@ def addToCSV(product):
             writer.writerow(product_row)
 
 
-def generateProductInfoBoilerplate():
+def getProductInfo():
     # get the product title from the user
     title = input('Please input the product title: ')
 
@@ -84,6 +84,7 @@ def generateProductInfoBoilerplate():
         comp_price = input('Please input comparison price - should be greater than ' + base_price  + ': ')
         comp_price_float = float(comp_price)
 
+    # will generate the required number of rows based on the # of VARIENTS
     multipled_rows = generateMultipleDictRows(handle,title,tags,vendor,base_price,comp_price,sku)
     return multipled_rows
     
@@ -152,6 +153,7 @@ def generateMultipleDictRows(handle,title,tags,vendor,base_price,comp_price,sku)
             prod_title = '' 
             prod_tags = '' 
             prod_vendor = ''
+            
 
             # Default Values 
             prod_category = ''
@@ -166,6 +168,7 @@ def generateMultipleDictRows(handle,title,tags,vendor,base_price,comp_price,sku)
             prod_include_mx = ''
             prod_include_int = ''
             prod_status = ''
+            prod_body = ''
 
         else: 
             prod_title = title 
@@ -175,7 +178,8 @@ def generateMultipleDictRows(handle,title,tags,vendor,base_price,comp_price,sku)
             prod_base_price = base_price 
             prod_comp_price = comp_price 
             prod_seo_title = 'Best ' + title + ' Kicks4ThaLow | Long Beach, CA'
-            prod_seo_description = 'Your one stop shop for all your Sneaker Needs, in Long Beach CA specializing in ' + prod_seo_title + ' | Kicks4ThaLow'
+            prod_seo_description = 'Your one-stop shop for all your sneaker needs, in Long Beach, CA, specializing in ' + title + '. Find the perfect pair with Kicks4ThaLow, where we bring you the best ' + title + ' right to your door. Our exclusive selection and unbeatable prices make us the go-to destination for sneakers in Long Beach, CA. Upgrade your collection with Kicks4ThaLow and experience why we’re the top choice for affordable, high-quality kicks.'
+            prod_body = '<p> ' + prod_seo_description +' </p>'
             prod_include_us = 'TRUE'
             prod_include_mx = 'TRUE'
             prod_include_int = 'TRUE'
@@ -191,7 +195,7 @@ def generateMultipleDictRows(handle,title,tags,vendor,base_price,comp_price,sku)
         product_row_template =   {
             'Handle': prod_handle, 
             'Title': prod_title,
-            'Body (HTML)': '',
+            'Body (HTML)': prod_body,
             'Vendor': prod_vendor, 
             'Product Category': prod_category, 
             'Type': prod_type, 
@@ -265,7 +269,7 @@ def getVendor(title):
     return 'No Vendor Found'
 
 def main():
-    product = generateProductInfoBoilerplate()
+    product = getProductInfo()
     addToCSV(product)
 
 
